@@ -15,7 +15,7 @@ only as an example.
 This sample can be built using maven for your convenience:
 
 ```shell
-  $ cd $REPOSITORY_PATH
+  $ cd $REPOSITORY_PATH/samples/pgp
   $ mvn package
 ```
 

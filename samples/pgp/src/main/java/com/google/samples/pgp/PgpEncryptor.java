@@ -124,6 +124,7 @@ public class PgpEncryptor {
      *
      * @param plainText the plain text to encrypt
      * @return the signed cipher text
+     * @throws PgpEncryptionException if the encryption fails
      */
     public String encrypt(String plainText) throws PgpEncryptionException {
         List<PGPPublicKey> encryptionKeys = this.keyProvider.getPublicKeys();
@@ -140,6 +141,7 @@ public class PgpEncryptor {
      * @param senders a string array with the user identifiers of the senders
      * @param recipients a string array with the user identifiers of the recipients
      * @return the signed cipher text
+     * @throws PgpEncryptionException if the encryption fails
      */
     public String encrypt(String plainText, String[] senders, String[] recipients)
         throws PgpEncryptionException {
@@ -335,6 +337,7 @@ public class PgpEncryptor {
      *
      * @param cipherText the cipher text to decrypt
      * @return the plain text
+     * @throws PgpDecryptionException if the decryption fails
      */
     public String decrypt(String cipherText) throws PgpDecryptionException {
         List<PGPSecretKey> decryptionKeys = this.keyProvider.getSecretKeys();
@@ -352,6 +355,7 @@ public class PgpEncryptor {
      * @param senders a string array with the user identifiers of the senders
      * @param recipients a string array with the user identifiers of the recipients
      * @return the plain text
+     * @throws PgpDecryptionException if the decryption fails
      */
     public String decrypt(String cipherText, String[] senders, String[] recipients)
         throws PgpDecryptionException {
