@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Optional;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -101,6 +102,7 @@ public final class PgpTool {
                     ? new char[0]
                     : readSecretKeyPassphrase();
             KEY_MANAGER.addSecretKeys(secretKeys, passphrase);
+            Arrays.fill(passphrase, '0');
         }
     }
 
