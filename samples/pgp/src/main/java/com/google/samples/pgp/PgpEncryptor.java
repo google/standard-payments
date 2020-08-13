@@ -68,7 +68,7 @@ import org.bouncycastle.openpgp.operator.bc.BcPublicKeyKeyEncryptionMethodGenera
  * PGP encryptor/decryptor.
  * Requires a PgpKeyProvider.
  */
-public class PgpEncryptor {
+public final class PgpEncryptor {
     private static final Logger LOGGER = LogManager.getLogger(PgpEncryptor.class);
     private static final int BUFFER_SIZE = 1 << 16;
 
@@ -163,7 +163,7 @@ public class PgpEncryptor {
 
             return BaseEncoding.base64Url().encode(output);
         } catch (IOException exception) {
-            throw new PgpEncryptionException(exception);
+            throw new PgpEncryptionException("Plain text reading error", exception);
         }
     }
 
@@ -182,7 +182,7 @@ public class PgpEncryptor {
 
             return outputStream.toByteArray();
         } catch (IllegalStateException | IOException | PGPException exception) {
-            throw new PgpEncryptionException(exception);
+            throw new PgpEncryptionException("Cipher text writing error", exception);
         }
     }
 
@@ -191,7 +191,7 @@ public class PgpEncryptor {
             OutputStream outputStream,
             List<PGPPublicKey> encryptionKeys,
             List<PGPSecretKey> signingKeys
-    ) throws IOException, PgpEncryptionException, PGPException {
+    ) throws IOException, PGPException {
         LOGGER.debug("Encrypting with ASCII armour");
 
         try (ArmoredOutputStream armoredOutputStream = new ArmoredOutputStream(outputStream)) {
@@ -204,7 +204,7 @@ public class PgpEncryptor {
             OutputStream outputStream,
             List<PGPPublicKey> encryptionKeys,
             List<PGPSecretKey> signingKeys
-    ) throws IOException, PgpEncryptionException, PGPException {
+    ) throws IOException, PGPException {
         // Create data generator and prepare it to encrypt with all the public keys
         PGPEncryptedDataGenerator dataGenerator = createDataGenerator(encryptionKeys);
         // Create encrypted output and write
@@ -233,7 +233,7 @@ public class PgpEncryptor {
             InputStream inputStream,
             OutputStream encryptedOutputStream,
             List<PGPSecretKey> signingKeys
-    ) throws IOException, PgpEncryptionException, PGPException {
+    ) throws IOException, PGPException {
         // Generate compressed data
         PGPCompressedDataGenerator compressedDataGenerator =
                 new PGPCompressedDataGenerator(CompressionAlgorithmTags.ZIP);
@@ -269,7 +269,7 @@ public class PgpEncryptor {
     }
 
     private List<PGPSignatureGenerator> createSignatureGenerators(
-            Collection<PGPSecretKey> signingKeys) throws PGPException, PgpEncryptionException {
+            Collection<PGPSecretKey> signingKeys) throws PGPException {
         List<PGPSignatureGenerator> signatureGenerators = new ArrayList<>();
 
         for (PGPSecretKey signingKey : signingKeys) {
@@ -436,12 +436,12 @@ public class PgpEncryptor {
                 throw new PgpDecryptionException("Message failed integrity check");
             }
             if (!signatureVerified) {
-                throw new PgpDecryptionException("Signature not verified.");
+                throw new PgpDecryptionException("Signature not verified");
             }
 
             return plainText;
         } catch (IOException | PGPException exception) {
-            throw new PgpDecryptionException(exception);
+            throw new PgpDecryptionException("Cipher text reading error", exception);
         }
     }
 
@@ -561,7 +561,7 @@ public class PgpEncryptor {
 
     private boolean verifyAnySignature(
             PGPSignatureList signatures, PGPOnePassSignature onePassSignature
-    ) throws PgpDecryptionException, PGPException {
+    ) throws PGPException {
         Optional<PGPSignature> possibleSignature = Lists.newArrayList(signatures)
                 .stream()
                 .filter(signature -> signature.getKeyID() == onePassSignature.getKeyID())
@@ -576,24 +576,11 @@ public class PgpEncryptor {
     }
 
     /**
-     * Custom base exception.
-     */
-    public static class PgpException extends Exception {
-        PgpException(Throwable throwable) {
-            super(throwable);
-        }
-
-        PgpException(String message) {
-            super(message);
-        }
-    }
-
-    /**
      * Custom exception for any encryption errors.
      */
-    public static class PgpEncryptionException extends PgpException {
-        public PgpEncryptionException(Throwable throwable) {
-            super(throwable);
+    public static final class PgpEncryptionException extends PgpException {
+        public PgpEncryptionException(String message, Exception innerException) {
+            super(message, innerException);
         }
 
         public PgpEncryptionException(String message) {
@@ -604,9 +591,9 @@ public class PgpEncryptor {
     /**
      * Custom exception for any decryption errors.
      */
-    public static class PgpDecryptionException extends PgpException {
-        public PgpDecryptionException(Throwable throwable) {
-            super(throwable);
+    public static final class PgpDecryptionException extends PgpException {
+        public PgpDecryptionException(String message, Exception innerException) {
+            super(message, innerException);
         }
 
         public PgpDecryptionException(String message) {

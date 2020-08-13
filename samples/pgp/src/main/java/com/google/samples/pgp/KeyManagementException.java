@@ -13,15 +13,11 @@
 // limitations under the License.
 package com.google.samples.pgp;
 
-import java.io.InputStream;
-import java.util.Map;
-import java.util.Set;
-
 /**
- * A key storage.
+ * Custom exception for any key-related error.
  */
-public interface KeyManager {
-    Map<Long, Set<String>> addPublicKeys(InputStream inputStream) throws KeyManagementException;
-    Map<Long, Set<String>> addSecretKeys(InputStream inputStream, char[]... passphrases)
-        throws KeyManagementException;
+public class KeyManagementException extends PgpException {
+    public KeyManagementException(String message, Exception innerException) {
+        super(message, innerException);
+    }
 }

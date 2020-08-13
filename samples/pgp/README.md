@@ -30,6 +30,25 @@ this example exposes. It will require you to provide public and secret keys to
 experiment with but in case you do not have any you can use the files included
 in the `resources` folder.
 
+Additionally, you can use the PgpTool class to quickly encrypt or decrypt a
+message using a PGP key pair:
+
+```shell
+  $ java -cp "target/*" com.google.samples.pgp.PgpTool
+```
+
+The class supports the following flags:
+
+```shell
+ -a,--ascii-armour       ASCII armoured message
+ -d,--decrypt            Decrypt cipher text
+ -e,--encrypt            Encrypt plain text
+ -m,--message <arg>      Message to process
+ -n,--no-passphrase      No passphrase secret key
+ -p,--public-key <arg>   Public key path
+ -s,--secret-key <arg>   Secret key path
+```
+
 ## How the example works
 
 In a nutshell, there are two main components in the example:

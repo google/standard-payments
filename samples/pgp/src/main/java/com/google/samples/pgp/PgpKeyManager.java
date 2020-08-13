@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.Security;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -53,8 +54,8 @@ import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
  * chains are synchronised.
  *
  */
-public class PgpKeyManager implements KeyManager,
-    KeyProvider<PGPPublicKey, PGPSecretKey, PGPPrivateKey> {
+public final class PgpKeyManager implements KeyManager,
+        KeyProvider<PGPPublicKey, PGPSecretKey, PGPPrivateKey> {
     private static final Logger LOGGER = LogManager.getLogger(PgpKeyManager.class);
     private static volatile PgpKeyManager INSTANCE;
 
@@ -98,9 +99,14 @@ public class PgpKeyManager implements KeyManager,
      * Tries to add all the key rings in the collection to the instance key ring collection.
      *
      * @param inputStream an encoded public key ring collection
+     * @return A map of the key IDs to the user IDs of the keys
      */
     @Override
-    public synchronized void addPublicKeys(InputStream inputStream) throws KeyManagementException {
+    public synchronized Map<Long, Set<String>> addPublicKeys(
+            InputStream inputStream
+    ) throws KeyManagementException {
+        Map<Long, Set<String>> keyUsers = new HashMap<>();
+
         try {
             InputStream decodedStream = PGPUtil.getDecoderStream(inputStream);
             PGPPublicKeyRingCollection keyRingCollection =
@@ -109,19 +115,24 @@ public class PgpKeyManager implements KeyManager,
                     .forEach(keyRing -> {
                         List<PGPPublicKey> publicKeys = Lists.newArrayList(keyRing.getPublicKeys());
                         LOGGER.debug(
-                            String.format("Reading %d public keys from keyring", publicKeys.size())
+                                String.format("Reading %d public keys from keyring", publicKeys.size())
                         );
-                        publicKeys.forEach(
-                            key -> LOGGER.debug("Adding public key: " + key.getKeyID())
-                        );
+
+                        for (PGPPublicKey key : publicKeys) {
+                            LOGGER.debug("Adding public key: " + key.getKeyID());
+                            keyUsers.putIfAbsent(key.getKeyID(), Sets.newHashSet(key.getUserIDs()));
+                        }
+
                         this.publicKeyRings =
-                            PGPPublicKeyRingCollection.addPublicKeyRing(
-                                this.publicKeyRings, keyRing
-                            );
+                                PGPPublicKeyRingCollection.addPublicKeyRing(
+                                        this.publicKeyRings, keyRing
+                                );
                     });
         } catch (IllegalArgumentException | IOException | PGPException exception) {
-            throw new KeyManagementException(exception);
+            throw new KeyManagementException("Problem adding PGP public key", exception);
         }
+
+        return keyUsers;
     }
 
     /**
@@ -133,10 +144,14 @@ public class PgpKeyManager implements KeyManager,
      * @param inputStream an encoded private key ring collection
      * @param passphrases an array of passphrases for any of the secret keys in the private key ring
      * collection.
+     * @return A map of the key IDs to the user IDs of the keys
      */
     @Override
-    public synchronized void addSecretKeys(InputStream inputStream, char[]... passphrases)
-            throws KeyManagementException {
+    public synchronized Map<Long, Set<String>> addSecretKeys(
+            InputStream inputStream, char[]... passphrases
+    ) throws KeyManagementException {
+        Map<Long, Set<String>> keyUsers = new HashMap<>();
+
         try {
             InputStream decodedStream = PGPUtil.getDecoderStream(inputStream);
             PGPSecretKeyRingCollection keyRingCollection =
@@ -152,6 +167,9 @@ public class PgpKeyManager implements KeyManager,
                                     extractPrivateKey(masterKey, passphrases);
 
                             if (privateKeyMatch.isPresent()) {
+                                keyUsers.putIfAbsent(
+                                        masterKey.getKeyID(), Sets.newHashSet(masterKey.getUserIDs())
+                                );
                                 PGPPrivateKey privateKey = privateKeyMatch.get();
                                 this.privateKeys.put(masterKey.getKeyID(), privateKey);
                                 return true;
@@ -167,8 +185,10 @@ public class PgpKeyManager implements KeyManager,
                                 );
                     });
         } catch (IOException | PGPException exception) {
-            throw new KeyManagementException(exception);
+            throw new KeyManagementException("Problem adding PGP secret key", exception);
         }
+
+        return keyUsers;
     }
 
     private Optional<PGPSecretKey> getMasterSecretKey(PGPSecretKeyRing keyRing) {

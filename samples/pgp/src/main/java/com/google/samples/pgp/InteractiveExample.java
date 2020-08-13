@@ -14,10 +14,8 @@
 package com.google.samples.pgp;
 
 import com.google.common.collect.Sets;
-import com.google.samples.pgp.KeyManager.KeyManagementException;
 import com.google.samples.pgp.PgpEncryptor.PgpDecryptionException;
 import com.google.samples.pgp.PgpEncryptor.PgpEncryptionException;
-import com.google.samples.pgp.PgpEncryptor.PgpException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +28,7 @@ import java.util.Set;
 /**
  * A simple example on how to use the PgpEncryptor.
  */
-public class InteractiveExample {
+public final class InteractiveExample {
     private static BufferedReader READER = new BufferedReader(new InputStreamReader(System.in));
 
     public static void main(String... args) throws IOException {
@@ -74,7 +72,7 @@ public class InteractiveExample {
                         decryptMessage(encryptor);
                         break;
                 }
-            } catch (PgpException | KeyManagementException exception) {
+            } catch (PgpException exception) {
                 System.out.println(exception.getMessage());
             }
 

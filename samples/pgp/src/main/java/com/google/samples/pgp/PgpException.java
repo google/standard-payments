@@ -13,15 +13,17 @@
 // limitations under the License.
 package com.google.samples.pgp;
 
-import java.io.InputStream;
-import java.util.Map;
-import java.util.Set;
+import org.bouncycastle.openpgp.PGPException;
 
 /**
- * A key storage.
+ * Custom base exception.
  */
-public interface KeyManager {
-    Map<Long, Set<String>> addPublicKeys(InputStream inputStream) throws KeyManagementException;
-    Map<Long, Set<String>> addSecretKeys(InputStream inputStream, char[]... passphrases)
-        throws KeyManagementException;
+public class PgpException extends PGPException {
+    public PgpException(String message, Exception innerException) {
+        super(message, innerException);
+    }
+
+    public PgpException(String message) {
+        super(message);
+    }
 }

@@ -16,7 +16,6 @@ package com.google.samples.pgp;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.google.samples.pgp.PgpEncryptor.PgpException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -44,7 +43,7 @@ class PgpEncryptorTest {
     private static final String CHUCK_ID = "Chuck <chuck@example.com>";
 
     @BeforeAll
-    static void addKeys() throws IOException, KeyManager.KeyManagementException {
+    static void addKeys() throws IOException, KeyManagementException {
         KeyManager keyManager = PgpKeyManager.getInstance();
 
         try (InputStream publicKeys = Files.newInputStream(PUBLIC_KEYS_PATH);
