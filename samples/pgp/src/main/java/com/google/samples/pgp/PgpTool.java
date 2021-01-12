@@ -155,10 +155,7 @@ public final class PgpTool {
 
     private static Options createOptions() {
         Options options = new Options();
-        Option option = new Option("m", "message", true, "Message to process");
-        option.setRequired(true);
-        options.addOption(option);
-        option = new Option("p", "public-key", true, "Public key path");
+        Option option = new Option("p", "public-key", true, "Public key path");
         option.setRequired(true);
         options.addOption(option);
         option = new Option("k", "secret-key", true, "Secret key path");
