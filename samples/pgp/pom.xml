@@ -18,7 +18,7 @@
     <groupId>com.google.gsp.samples</groupId>
     <artifactId>pgp</artifactId>
     <name>Google Standard Payments: PGP Encryption Samples</name>
-    <version>1.4</version>
+    <version>1.5</version>
     <description>Code samples for multiple PGP key encryption + signing and decryption + verification</description>
     <url>https://github.com/google/standard-payments</url>
 
@@ -99,7 +99,7 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcpg-jdk15on</artifactId>
-            <version>1.65</version>
+            <version>1.68</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
